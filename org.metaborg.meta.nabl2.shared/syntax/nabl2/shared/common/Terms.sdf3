@@ -5,6 +5,10 @@ imports
   nabl2/shared/common/Identifiers
   nabl2/shared/common/Vars
 
+template options
+
+  keyword -/- [a-zA-Z0-9\']
+
 context-free syntax
 
   Term          = Var
@@ -38,4 +42,18 @@ context-free syntax
   Pattern.ListTail = <[<{Pattern ","}*>|<Pattern>]>
   Pattern.Tuple    = <(<{Pattern ","}*>)>
   Pattern.As       = <<Var>@<Pattern>>
+  Pattern          = IntTerm
+  Pattern          = StringTerm
 
+context-free syntax
+
+  Sort            = SortVar
+  Sort.SortNoArgs = SortId
+  Sort.Sort       = <<SortId>(<{Sort ","}*>)>
+
+lexical syntax
+
+  SortVar.Var     = VarId
+  SortId          = OpId
+ 
+ 

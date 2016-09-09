@@ -1,0 +1,8 @@
+module nabl2/runtime/common/Main
+
+imports
+
+  nabl2/runtime/common/Resolution
+  nabl2/runtime/common/ScopeGraph
+  nabl2/runtime/common/Types
+

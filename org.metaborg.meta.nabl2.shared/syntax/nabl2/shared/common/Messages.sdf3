@@ -3,6 +3,7 @@ module nabl2/shared/common/Messages
 imports
 
   nabl2/shared/common/AST
+  nabl2/shared/common/Native
   nabl2/shared/common/Terms
 
 template options
@@ -20,7 +21,7 @@ context-free syntax
   MessageContent.Default   =
   MessageContent           = StringTerm
 
-  MessagePosition          = ASTIndex
+  MessagePosition          = TermIndex
 
 syntax
 

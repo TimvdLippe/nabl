@@ -11,41 +11,51 @@ imports
 
 rules
  
-  sol-new =
-    ts := <initial-subtype-relation>;
-    !Sol(<G-new>,[],[],[],ts)
+  sol-new = ![
+    ScopeGraph(<G-new>),
+    NameResolution([]),
+    Typing([]),
+    Values([]),
+    Substitution([]),
+    SubtypeRelation(<initial-subtype-relation>),
+    Uninterpreted([],[]),
+    Errors([]),
+    Warnings([]),
+    Notes([])
+  ]
 
-  sol-g = ?Sol(<id>,_,_,_,_) 
-  sol-r = ?Sol(_,<id>,_,_,_) 
-  sol-p = ?Sol(_,_,<id>,_,_)
-  sol-s = ?Sol(_,_,_,<id>,_)
-  sol-x = ?Sol(_,_,_,_,<id>)
+  sol-g       = fetch-elem(?ScopeGraph(<id>))
+  sol-r       = fetch-elem(?NameResolution(<id>))
+  sol-t       = fetch-elem(?Typing(<id>))
+  sol-v       = fetch-elem(?Values(<id>))
+  sol-s       = fetch-elem(?Substitution(<id>))
+  sol-x       = fetch-elem(?SubtypeRelation(<id>))
+  sol-u-goals = fetch-elem(?Uninterpreted(<id>,_))
+  sol-u-facts = fetch-elem(?Uninterpreted(_,<id>))
+  sol-e       = fetch-elem(?Errors(<id>))
+  sol-w       = fetch-elem(?Warnings(<id>))
+  sol-n       = fetch-elem(?Notes(<id>))
  
-  sol-with-g(|g):
-    Sol(_,r*,p*,s*,x*) -> Sol(g,r*,p*,s*,x*)
+  sol-with-g(|g) = fetch(ScopeGraph(!g))
 
-  sol-apply-s(|s'):
-    Sol(g,r*,p*,s*,x*) -> Sol(g',r'*,p'*,s'*,x*)
-    where g'  := <S-apply(is-var)> (s',g)
-        ; r'* := <S-apply(is-var)> (s',r*)
-        ; p'* := <S-apply(is-var)> (s',p*)
-        ; s'* := <S-compose(is-var)> (s',s*)
-        ; x'* := <S-apply(is-var)> (s',x*)
+  sol-apply-s(|s') =
+    map(Substitution(<S-compose(is-var)> (s',<id>)) <+ <S-apply(is-var)> (s',<id>))
 
-  sol-set-p(|p,ty):
-    Sol(g,r*,p*,s*,x*) -> Sol(g,r*,p'*,s*,x*)
-  with p'* := <set(!ty|p)> p*
+  sol-set-t(|o,ty) = fetch(Typing(set(!ty|o)))
 
-  sol-set-x(|x'*):
-    Sol(g,r*,p*,s*,_) -> Sol(g,r*,p*,s*,x'*)
+  sol-add-v(|o,val) = fetch(Values(update(![val|<id>],![]|o)))
 
-  sol-add-r(|r'*):
-    Sol(g,r*,p*,s*,x*) -> Sol(g,[r'*,r*],p*,s*,x*)
+  sol-set-x(|x*) = fetch(SubtypeRelation(!x*))
 
-  sol-set-r(|r,d):
-    Sol(g,r*,p*,s*,x*) -> Sol(g,r'*,p*,s*,x*)
-  with <set(!d|r)> r* => r'*
+  sol-set-r(|r*) = fetch(NameResolution(!r*))
 
-rules
+  sol-set-r(|r,d) = fetch(NameResolution(set(!d|r)))
 
-  sol-wm-apply-s(|s) = fmap(sol-apply-s(|s)) ; fmap-messages(<S-apply(is-var)> (s,<id>))
+  sol-add-u-goal(|g) = fetch(Uninterpreted(![g|<id>],id))
+  sol-add-u-fact(|f) = fetch(Uninterpreted(id,![f|<id>]))
+
+  sol-add-error(|msg) = fetch(Errors(set-add(message-eq|msg)))
+  sol-add-warning(|msg) = fetch(Warnings(set-add(message-eq|msg)))
+  sol-add-note(|msg) = fetch(Notes(set-add(message-eq|msg)))
+
+  is-erronious = fetch(?Errors([_|_]))

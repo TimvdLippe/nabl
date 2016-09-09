@@ -2,8 +2,10 @@ module common/Injections
 
 imports
 
-  nabl2/shared/common/Names
+  nabl2/shared/common/ScopeGraph
+  nabl2/shared/common/Terms
   nabl2/shared/common/Vars
+  nabl2/shared/constraints/Base
   
   common/Types
   
@@ -11,6 +13,5 @@ context-free syntax
 
   Message.DefaultMessage    =
 
-  ASTIndex.DefaultIndex     =
-  ASTIndex.ASTIndexFromTerm = <@<Var>>
-
+  TermIndex.DefaultIndex     =
+  TermIndex.IndexFromTerm = <@<Var>>
