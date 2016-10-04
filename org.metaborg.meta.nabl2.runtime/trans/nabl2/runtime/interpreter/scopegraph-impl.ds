@@ -5,24 +5,30 @@ imports
   nabl2/runtime/interpreter/scopegraph-api
 
 signature
-
-  sorts
-    TermIndex
-    Namespace
  
   constructors
-    Scope            : String -> Scope
+    Scope : String * String -> Scope
 
+  constructors
+    Occurrence : Namespace * String * TermIndex -> Occurrence
+ 
+  sorts TermIndex constructors
+    TermIndex : String * Int -> TermIndex
+ 
+  sorts Namespace constructors
     DefaultNamespace : Namespace
     Namespace        : String -> Namespace
  
-    TermIndex        : String * Int -> TermIndex
-
-    Occurrence       : Namespace * String * TermIndex -> Occurrence
-
-    Label            : String -> Label
+  sort aliases NameResolution = List((Occurrence * (Occurrence * /*Path*/List(Step))))
  
-    D                : Scope * Occurrence -> Path
-    N                : Scope * Label * Occurrence * Path * Path -> Path
-    E                : Scope * Label * Path -> Path
+  sorts ScopeGraph ScopeEntry constructors
+    G : List((Scope * ScopeEntry)) * List((Occurrence * List((Label * Scope)))) -> ScopeGraph
+    S : List(Occurrence) * List(Occurrence) * List((Label * Scope)) * List((Label * Occurrence)) -> ScopeEntry
 
+  native operators
+    nabl2_scopeGraph : AST -> ScopeGraph
+    nabl2_nameResolution : AST -> NameResolution
+
+rules
+
+  NaBL2(t) -init-> NaBL2(t) :: ScopeGraph nabl2_scopeGraph(t), NameResolution nabl2_nameResolution(t).

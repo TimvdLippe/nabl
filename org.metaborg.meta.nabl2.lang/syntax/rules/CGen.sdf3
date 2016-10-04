@@ -32,21 +32,21 @@ context-free syntax
 
   RuleClause = <(<Constraint>)>
 
-  RuleClause.CGenRecurse = <<RuleName> [[ <Var> <CGenParamsTerm> <CGenTypeTerm> ]]>
+  RuleClause.CGenRecurse = <<RuleName> [[ <TermVar> <CGenParamsTerm> <CGenTypeTerm> ]]>
 
-  RuleClause.NewScopes   = <new <{Var " "}+>>
+  RuleClause.NewScopes   = <new <{TermVar " "}+>>
 
 context-free syntax
 
-  CGenParamsTerm.List    = <^ (<{TypeTerm ","}*>)>
+  CGenParamsTerm.Tuple    = <^ (<{TypeTerm ","}*>)>
 
-  CGenParamsPattern.List = <^ (<{VarOrWld ","}*>)>
+  CGenParamsPattern.Tuple = <^ (<{TermVarOrWld ","}*>)>
 
-  CGenTypeTerm.NoType    =
-  CGenTypeTerm.Type      = <: <TypeTerm>>
+  CGenTypeTerm.NoType     =
+  CGenTypeTerm.Type       = <: <TypeTerm>>
 
-  CGenTypePattern.NoType =
-  CGenTypePattern.Type   = <: <TypePattern>>
+  CGenTypePattern.NoType  =
+  CGenTypePattern.Type    = <: <TypePattern>>
 
 lexical syntax
 

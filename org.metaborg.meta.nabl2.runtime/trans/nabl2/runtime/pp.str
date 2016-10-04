@@ -15,7 +15,7 @@ rules
   pp-NaBL2-Term           = pp-NaBL2(prettyprint-NaBL2-Term)
   pp-NaBL2-Constraint     = pp-NaBL2(prettyprint-NaBL2-Constraint)
   pp-NaBL2-Env            = pp-NaBL2(prettyprint-NaBL2-Env)
-  pp-NaBL2-Var            = pp-NaBL2(prettyprint-NaBL2-Var)
+  pp-NaBL2-CVar           = pp-NaBL2(prettyprint-NaBL2-CVar)
   pp-NaBL2-Type           = pp-NaBL2(prettyprint-NaBL2-TypeTerm)
   pp-NaBL2-LabelRE        = pp-NaBL2(prettyprint-NaBL2-LabelRE)
   pp-NaBL2-Label          = pp-NaBL2(prettyprint-NaBL2-AnyLabel)
@@ -31,5 +31,4 @@ rules
   prettyprint-NaBL2-object   = prettyprint-NaBL2-Scope
   prettyprint-NaBL2-object   = prettyprint-NaBL2-Occurrence
   prettyprint-NaBL2-object   = prettyprint-NaBL2-TypeList
-  prettyprint-NaBL2-object   = prettyprint-NaBL2-ValueKey
-  
+  prettyprint-NaBL2-object   = prettyprint-NaBL2-Property

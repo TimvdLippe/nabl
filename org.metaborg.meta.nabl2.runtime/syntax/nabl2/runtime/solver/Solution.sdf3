@@ -3,13 +3,13 @@ module nabl2/runtime/solver/Solution
 imports
 
   nabl2/shared/common/Terms
-  nabl2/shared/common/Vars
   nabl2/runtime/analysis/EditorMessages
   nabl2/runtime/common/Resolution
   nabl2/runtime/common/ScopeGraph
   nabl2/runtime/solver/Namebinding
   nabl2/runtime/solver/Substitution
-  nabl2/runtime/solver/Typechecking
+  nabl2/runtime/solver/Subtyping
+  nabl2/runtime/solver/Properties
 
 context-free syntax
 
@@ -30,14 +30,9 @@ context-free syntax
       <{OneResolution "\n"}*>
   >
 
-  SolutionComponent.Typing = <
-    typing :=
-      <{Typing "\n"}*>
-  >
-
-  SolutionComponent.Values = <
-    values :=
-      <{Valuation "\n"}*>
+  SolutionComponent.Properties = <
+    properties :=
+      <{Properties "\n"}*>
   >
 
   SolutionComponent.Substitution = <

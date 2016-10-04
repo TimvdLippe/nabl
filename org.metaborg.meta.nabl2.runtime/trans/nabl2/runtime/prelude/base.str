@@ -2,31 +2,23 @@ module nabl2/runtime/prelude/base
 
 imports
 
-  runtime/editor/annotations
+  libspoofax/term/annotation
 
 rules
 
-  noop(s) = id
+  nabl2--term-eq = (strip-annos,strip-annos) ; eq
 
-  term-eq = (strip-annos,strip-annos) ; eq
-
-  xmlencode =
+  nabl2--xmlencode =
     try(string-replace(|"&","&amp;"))
   ; try(string-replace(|"<","&lt;"))
   ; try(string-replace(|">","&gt;"))
 
-  debugwrap(n,s) = ?t ; <s> t ; debug(!$[[<n>]: [<write-to-string> t] -> ])
-  debugwrap(s) = ?t ; <s> t ; debug(!$[[<write-to-string> t] -> ])
+  nabl2--log(s|n) = with(s ; debug(!n))
+  nabl2--log(|n)  = nabl2--log(id|n)
+  nabl2--log(s)   = nabl2--log(s|"")
 
-  debugwrapfail(n,s) =
-    ?t
-  ; ( <s> t
-    < debug(!$[[<n>]: [<write-to-string> t] -> ])
-    + <debug> $[[<n>]: [<write-to-string> t] -> fail] ; fail
-    )
+  nabl2--assert(s|t) = with(<s> t <+ debug(!"Assert failed: "))
 
-  log(s|n) = with(s ; debug(!n))
-  log(|n)  = log(id|n)
-  log(s)   = log(s|"")
+  nabl2--strict(s) = with(s;?t|"Failure in strict mode"); !t
 
-  assert(s|t) = with(<s> t <+ debug(!"Assert failed: "))
+  nabl2--deprecated(|msg) = with(<warn(|"DEPRECATED")> msg)
