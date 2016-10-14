@@ -2,7 +2,9 @@ module nabl2/runtime/solver/sets
 
 imports
  
+  signatures/nabl2/shared/constraints/-
   nabl2/shared/-
+
   nabl2/runtime/analysis/-
   nabl2/runtime/common/-
   nabl2/runtime/prelude/-
@@ -18,7 +20,11 @@ rules
      ; ( ?[]
        < !sol
        + msg := "Duplicate"
-       ; <nabl2--add-message(nabl2--default-message(|msg)|<nabl2--apply-elems-message(|x'*)> msginfo)> sol
+       ; if msginfo* := <nabl2--apply-elems-message(|x'*)> msginfo then
+           <nabl2--add-messages(nabl2--default-message(|msg)|msginfo*)> sol
+         else
+           <nabl2--add-message(nabl2--default-message(|msg)|msginfo)> sol
+         end
        ) => sol'
 
   nabl2--solve-set-constraint: (CSubsetEq(x1*,x2*,msginfo),sol) -> [(sol',[])]
@@ -28,7 +34,11 @@ rules
      ; ( ?[]
        < !sol
        + msg := "Missing"
-       ; <nabl2--add-message(nabl2--default-message(|msg)|<nabl2--apply-elems-message(|x'*)> msginfo)> sol
+       ; if msginfo* := <nabl2--apply-elems-message(|x'*)> msginfo then
+           <nabl2--add-messages(nabl2--default-message(|msg)|msginfo*)> sol
+         else
+           <nabl2--add-message(nabl2--default-message(|msg)|msginfo)> sol
+         end
        ) => sol'
 
   nabl2--constraint-priority: CDistinct(_,_) -> 3
@@ -36,7 +46,19 @@ rules
 
 rules
 
-  nabl2-reduce-op-hook(|sol): Empty() -> []
+  nabl2--postprocess-constraint = nabl2--postprocess-set-constraint
+
+  nabl2--postprocess-set-constraint: (CDistinct(s, msginfo), sol) -> sol'
+  with msg := ["Failed to check if elements in ",s," are distinct"];
+       sol' := <nabl2--add-message(nabl2--default-message(|msg)|msginfo)> sol
+
+  nabl2--postprocess-set-constraint: (CSubsetEq(s1, s2, msginfo), sol) -> sol'
+  with msg := ["Failed to check if ",s1," is a subset of or equal to ",s2];
+       sol' := <nabl2--add-message(nabl2--default-message(|msg)|msginfo)> sol
+
+rules
+
+  nabl2-reduce-op-hook(|sol): EmptySet() -> []
 
   nabl2-reduce-op-hook(|sol): Isect(s1,s2) -> <nabl2--bag-isect> (s1,s2)
     where <nabl2--is-ground> s1;
@@ -50,18 +72,4 @@ rules
     where <nabl2--is-ground> s1;
           <nabl2--is-ground> s2
  
-rules
- 
-  nabl2--elems-pos(|x*) = fail
-  nabl2--elems-rep(|x*) = fail
- 
-  nabl2--apply-elems-message(|x*) =
-    Message(id,bottomup(try(nabl2--elems-rep(|x*))),try(nabl2--elems-pos(|x*)))
-
-  nabl2--constraint-message:
-    CDistinct(n,msginfo) -> <nabl2--default-message(|msg)> msginfo
-    with msg := ["Failed to check if elements of ",n," are distinct"]
-
-  nabl2--constraint-message:
-    CSubsetEq(s1,s2,msginfo) -> <nabl2--default-message(|msg)> msginfo
-    with msg := ["Failed to check if ",s1," is a subset of, or equal to ",s2]
+  nabl2--apply-elems-message(|x*) = fail

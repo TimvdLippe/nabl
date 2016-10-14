@@ -4,8 +4,11 @@ imports
 
   libspoofax/term/origin
 
+  signatures/nabl2/shared/common/-
+  signatures/nabl2/shared/constraints/-
   nabl2/shared/-
 
+  signatures/nabl2/runtime/common/-
   nabl2/runtime/-
   nabl2/runtime/common/-
   nabl2/runtime/prelude/-
@@ -17,38 +20,27 @@ rules
 
   nabl2--detail-message(|detailmsg): Message(kind,msg,pos) -> Message(kind,msg',pos)
     with if Default() := msg then
-           msg' := detailmsg
+           msg' := <nabl2--sanitize-message> detailmsg
          else
-           msg*  := <is-list <+ MkSingleton> msg;
-           dmsg* := <is-list <+ MkSingleton> detailmsg;
-           msg'  := [msg*," (",dmsg*,")"]
+           msg' := Formatted([<nabl2--sanitize-message> msg, Text(" ("), <nabl2--sanitize-message> detailmsg, Text(")")])
          end
 
   nabl2--default-messages(|defaultmsg) = map(nabl2--default-message(|defaultmsg))
 
   nabl2--default-message(|defaultmsg): Message(kind,msg,pos) -> Message(kind,msg',pos)
     with if Default() := msg then
-           msg' := defaultmsg
+           msg' := <nabl2--sanitize-message> defaultmsg
          else
-           msg' := msg
+           msg' := <nabl2--sanitize-message> msg
          end
 
   nabl2--add-messages(s|msginfo*): sol -> sol'
-    with sol' := <foldr(!sol,nabl2--add-message-step(s))> msginfo*
+    with sol' := <foldr(!sol,\ (msginfo,sol) -> <nabl2--add-message(s|msginfo)> sol \)> msginfo*
 
   nabl2--add-message(s|msginfo): sol -> sol'
     with Message(kind,msg,pos) := <s> msginfo
-    where <is-list> pos
-    with sol' := <map(!Message(kind,msg,<id>));
-                  foldr(!sol,nabl2--add-message-step(s))> pos
-
-  nabl2--add-message(s|msginfo): sol -> sol'
-    with Message(kind,msg,pos) := <s> msginfo
-    where <not(is-list)> pos
-    with msg' := <pp-NaBL2-MessageContent> msg;
+    with msg' := <nabl2--sanitize-message;pp-NaBL2-MessageContent> msg;
          sol' := <nabl2--add-message> (kind,(pos,msg'),sol)
-
-  nabl2--add-message-step(s) = ?(msginfo,<id>) ; nabl2--add-message(s|msginfo)
 
   nabl2--add-message: (Error(), error, sol) -> <nabl2--sol-add-error(|error)> sol
   nabl2--add-message: (Warning(), warning, sol) -> <nabl2--sol-add-warning(|warning)> sol
@@ -59,21 +51,21 @@ rules
 
 rules
 
-  postprocess-errors: (sol,c*) -> (sol',[])
-  with <nabl2--sol-p;nabl2--free-var-messages> sol => fmsg*;
-       <map({?c;nabl2--get-constraint-message;nabl2--detail-message(|"Unsolved")})> c* => umsg*;
-       <nabl2--add-messages(id|[fmsg*,umsg*])> sol;
-       nabl2--unresolved-refs-errors;
-       ?sol'
+  nabl2--sanitize-message =
+    ?Default()
+ <+ ?Formatted(_)
+ <+ ?Text(_)
+ <+ ?Term(_)
+ <+ !Text(<is-string>)
+ <+ !Formatted(<is-list;map(nabl2--sanitize-message)>)
+ <+ !Term(<id>)
 
-  nabl2--free-var-messages =
-    nabl2--all-vars; map(!Message(Warning(),["Free variable ",<id>],<id>))
+rules
 
-  nabl2--constraint-message = fail
-
-  nabl2--get-constraint-message =
-    ?c
-  ; ( (nabl2--constraint-message ; nabl2--default-message(|<pp-NaBL2-Constraint> c))
-   <+ !Message(Error(),<pp-NaBL2-Constraint> c,None())
-    )
+  nabl2--add-unsolved-constraint-error =
+    ?(c,sol);
+  nabl2--strict(
+    msg := Message(Error(),$[Unsolved constraint: [<pp-NaBL2-Constraint> c]],None());
+    <nabl2--add-message(id|msg)> sol
+  )
 

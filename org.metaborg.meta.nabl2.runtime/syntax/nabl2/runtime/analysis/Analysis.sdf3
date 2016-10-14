@@ -2,9 +2,10 @@ module nabl2/runtime/analysis/Analysis
 
 imports
 
-  nabl2/shared/common/Native
   nabl2/shared/common/Resolution
   nabl2/shared/constraints/Base
+  nabl2/runtime/common/AST
+  nabl2/runtime/common/Native
   nabl2/runtime/common/Resolution
   nabl2/runtime/common/ScopeGraph
   nabl2/runtime/solver/Solution
@@ -42,6 +43,11 @@ context-free syntax
   AnalysisResult.InitialResolution = <
     initial name resolution := 
       <{FullResolution "\n"}*>
+  >
+
+  AnalysisResult.AstMetadata = <
+    AST metadata := 
+      <{AstMetadata "\n"}*>
   >
 
   AnalysisResult.Timing = <
